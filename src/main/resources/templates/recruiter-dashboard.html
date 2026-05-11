@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireFlow — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --navy:#1a2744; --navy2:#243358; --accent:#2563eb; --border:#e2e8f0; --muted:#64748b; --bg:#f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
+
+        .topbar { background: var(--navy); padding: 0 48px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; text-decoration: none; }
+        .logo span { color: #60a5fa; }
+        .nav-r { display: flex; align-items: center; gap: 20px; }
+        .role-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 5px 14px 5px 8px; font-size: 0.78rem; font-weight: 600; color: #94a3b8; }
+        .av { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.72rem; font-weight: 700; }
+        .btn-out { font-size: 0.8rem; font-weight: 600; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color 0.18s; }
+        .btn-out:hover { color: #f87171; }
+
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px; flex: 1; width: 100%; }
+
+        .pg-head { margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+        .pg-head .tag { font-size: 0.72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+        .pg-head h1 { font-size: 1.5rem; font-weight: 700; color: var(--navy); letter-spacing: -0.4px; margin-bottom: 4px; }
+        .pg-head p { font-size: 0.86rem; color: var(--muted); }
+
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 36px; }
+        .sc { background: #fff; border-radius: 8px; padding: 22px 20px; border: 1px solid var(--border); transition: box-shadow 0.18s, transform 0.18s; position: relative; overflow: hidden; }
+        .sc:hover { box-shadow: 0 6px 24px rgba(26,39,68,0.08); transform: translateY(-2px); }
+        .sc::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 8px 8px 0 0; }
+        .sc.t::before { background: var(--navy); }
+        .sc.a::before { background: var(--accent); }
+        .sc.s::before { background: #16a34a; }
+        .sc.r::before { background: #dc2626; }
+        .sc-icon { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; margin-bottom: 14px; }
+        .sc.t .sc-icon { background: #f1f5f9; color: var(--navy); }
+        .sc.a .sc-icon { background: #eff6ff; color: var(--accent); }
+        .sc.s .sc-icon { background: #f0fdf4; color: #16a34a; }
+        .sc.r .sc-icon { background: #fef2f2; color: #dc2626; }
+        .sc-num { font-size: 2rem; font-weight: 700; color: var(--navy); line-height: 1; margin-bottom: 4px; }
+        .sc-lbl { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+
+        .sec-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .ac { background: #fff; border-radius: 8px; padding: 26px 24px; border: 1px solid var(--border); text-decoration: none; display: block; transition: box-shadow 0.18s, transform 0.18s, border-color 0.18s; }
+        .ac:hover { box-shadow: 0 6px 24px rgba(26,39,68,0.08); transform: translateY(-2px); border-color: #93c5fd; }
+        .ac-icon { width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 14px; }
+        .ac.add .ac-icon { background: var(--navy); color: #60a5fa; }
+        .ac.view .ac-icon { background: #eff6ff; color: var(--accent); }
+        .ac h4 { font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+        .ac p { font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin: 0; }
+        .ac-arrow { margin-top: 14px; font-size: 0.8rem; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 5px; }
+
+        footer { background: var(--navy); color: #334155; text-align: center; padding: 16px; font-size: 0.75rem; margin-top: auto; }
+
+        @media (max-width: 768px) { .stats { grid-template-columns: 1fr 1fr; } .actions { grid-template-columns: 1fr; } .topbar { padding: 0 20px; } }
+    </style>
+</head>
+<body>
+<nav class="topbar">
+    <a href="/" class="logo">Hire<span>Flow</span></a>
+    <div class="nav-r">
+        <div class="role-pill"><div class="av">R</div> Recruiter</div>
+        <a href="/logout" class="btn-out"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
+</nav>
+
+<div class="wrap">
+    <div class="pg-head">
+        <div class="tag">Recruiter Dashboard</div>
+        <h1>Pipeline Overview</h1>
+        <p>Your recruitment activity at a glance.</p>
+    </div>
+
+    <div class="stats">
+        <div class="sc t"><div class="sc-icon"><i class="bi bi-people-fill"></i></div><div class="sc-num" th:text="${total}">0</div><div class="sc-lbl">Total Candidates</div></div>
+        <div class="sc a"><div class="sc-icon"><i class="bi bi-send-fill"></i></div><div class="sc-num" th:text="${applied}">0</div><div class="sc-lbl">Applied</div></div>
+        <div class="sc s"><div class="sc-icon"><i class="bi bi-check-circle-fill"></i></div><div class="sc-num" th:text="${selected}">0</div><div class="sc-lbl">Selected</div></div>
+        <div class="sc r"><div class="sc-icon"><i class="bi bi-x-circle-fill"></i></div><div class="sc-num" th:text="${rejected}">0</div><div class="sc-lbl">Rejected</div></div>
+    </div>
+
+    <div class="sec-label">Quick Actions</div>
+    <div class="actions">
+        <a href="/addCandidate" class="ac add">
+            <div class="ac-icon"><i class="bi bi-person-plus-fill"></i></div>
+            <h4>Add Candidate</h4>
+            <p>Register a new candidate into the recruitment pipeline with their details.</p>
+            <div class="ac-arrow">Get started <i class="bi bi-arrow-right"></i></div>
+        </a>
+        <a href="/viewCandidates" class="ac view">
+            <div class="ac-icon"><i class="bi bi-table"></i></div>
+            <h4>View All Candidates</h4>
+            <p>Browse, search, filter and update the status of every candidate in the system.</p>
+            <div class="ac-arrow">Open list <i class="bi bi-arrow-right"></i></div>
+        </a>
+    </div>
+</div>
+<footer>© 2026 HireFlow</footer>
+</body>
+</html>
