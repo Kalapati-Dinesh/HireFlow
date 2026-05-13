@@ -174,7 +174,12 @@ public class UserController {
             return "reset-password";
         }
         session.removeAttribute("resetToken");
-        model.addAttribute("msg", "Password reset successfully! You can now sign in.");
+        return "redirect:/reset-success";
+    }
+
+    @GetMapping("/reset-success")
+    public String resetSuccess(Model model) {
+        model.addAttribute("msg", "Password reset successfully! You can now sign in with your new password.");
         return "success";
     }
 }

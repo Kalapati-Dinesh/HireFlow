@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/login", "/signup", "/register",
                     "/verify-recruiter-code", "/logout",
-                    "/forgot-password", "/reset-password",
+                    "/forgot-password", "/reset-password", "/reset-success",
                     "/css/**", "/js/**", "/fonts/**", "/favicon.ico",
                     "/swagger-ui/**", "/v3/api-docs/**",
                     "/api/login", "/api/refresh"
