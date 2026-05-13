@@ -46,6 +46,7 @@ public class UserService {
     }
 
     public User findByResetToken(String token) {
+        if (token == null || token.isBlank()) return null;
         User user = userRepo.findByResetToken(token);
         if (user == null || user.getResetTokenExpiry() == null
                 || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) return null;

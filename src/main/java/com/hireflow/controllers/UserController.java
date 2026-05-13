@@ -152,10 +152,15 @@ public class UserController {
     public String resetPasswordPage(HttpSession session,
                                     @RequestParam(required = false) String token,
                                     Model model) {
-        // Support both session-based (in-app) and email link (token param)
         String resolvedToken = (token != null) ? token
                 : (String) session.getAttribute("resetToken");
-        if (resolvedToken == null || userService.findByResetToken(resolvedToken) == null) {
+        // Guard: no token at all
+        if (resolvedToken == null || resolvedToken.isBlank()) {
+            model.addAttribute("error", "No reset request found. Please enter your email again.");
+            return "reset-password";
+        }
+        // Guard: token invalid or expired
+        if (userService.findByResetToken(resolvedToken) == null) {
             model.addAttribute("error", "This reset link is invalid or has expired.");
             return "reset-password";
         }
