@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.hireflow.entities.User;
+import com.hireflow.services.EmailService;
 import com.hireflow.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -22,6 +23,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    EmailService emailService;
 
     @Value("${recruiter.access.code}")
     private String recruiterAccessCode;
@@ -121,5 +125,47 @@ public class UserController {
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/login";
+    }
+
+    // ── FORGOT PASSWORD ──
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String forgotPasswordSubmit(@RequestParam String email, Model model) {
+        String token = userService.generateResetToken(email);
+        if (token != null) {
+            String resetLink = "https://web-production-b16a4.up.railway.app/reset-password?token=" + token;
+            emailService.sendMail(email, "HireFlow — Reset Your Password",
+                "Hi,\n\nClick the link below to reset your password. This link expires in 30 minutes.\n\n" + resetLink + "\n\nIf you didn't request this, ignore this email.");
+        }
+        model.addAttribute("msg", "If an account exists with that email, a reset link has been sent.");
+        return "forgot-password";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPasswordPage(@RequestParam String token, Model model) {
+        if (userService.findByResetToken(token) == null) {
+            model.addAttribute("error", "This reset link is invalid or has expired.");
+            return "reset-password";
+        }
+        model.addAttribute("token", token);
+        return "reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPasswordSubmit(@RequestParam String token,
+                                      @RequestParam String password,
+                                      Model model) {
+        boolean success = userService.resetPassword(token, password);
+        if (!success) {
+            model.addAttribute("error", "This reset link is invalid or has expired.");
+            return "reset-password";
+        }
+        model.addAttribute("msg", "Password reset successfully! You can now sign in.");
+        return "success";
     }
 }
