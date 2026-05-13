@@ -16,10 +16,10 @@ public class EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
-    @Value("${resend.api.key}")
+    @Value("${resend.api.key:}")
     private String apiKey;
 
-    @Value("${resend.sender.email}")
+    @Value("${resend.sender.email:onboarding@resend.dev}")
     private String senderEmail;
 
     private final RestClient restClient = RestClient.create();
