@@ -58,13 +58,11 @@ public class UserController {
                                HttpSession session,
                                Model model) {
 
-        // Fix #8: Validate role against allowed values
         if (!ALLOWED_ROLES.contains(role)) {
             model.addAttribute("registerError", "Invalid role selected.");
             return "signup";
         }
 
-        // Extra guard: recruiter registration requires prior code verification
         if ("RECRUITER".equals(role)) {
             Boolean verified = (Boolean) session.getAttribute("recruiterVerified");
             if (verified == null || !verified) {
@@ -134,57 +132,40 @@ public class UserController {
         return "forgot-password";
     }
 
+    // Step 1: enter email → directly render reset-password (NO redirect)
     @PostMapping("/forgot-password")
-    public String forgotPasswordSubmit(@RequestParam String email,
-                                       HttpSession session,
-                                       Model model) {
+    public String forgotPasswordSubmit(@RequestParam String email, Model model) {
         String token = userService.generateResetToken(email);
         if (token == null) {
             model.addAttribute("error", "No account found with that email address.");
             return "forgot-password";
         }
-        // Store token in session — redirect directly to reset page, no email link needed
-        session.setAttribute("resetToken", token);
-        return "redirect:/reset-password";
-    }
-
-    @GetMapping("/reset-password")
-    public String resetPasswordPage(HttpSession session,
-                                    @RequestParam(required = false) String token,
-                                    Model model) {
-        String resolvedToken = (token != null) ? token
-                : (String) session.getAttribute("resetToken");
-        // Guard: no token at all
-        if (resolvedToken == null || resolvedToken.isBlank()) {
-            model.addAttribute("error", "No reset request found. Please enter your email again.");
-            return "reset-password";
-        }
-        // Guard: token invalid or expired
-        if (userService.findByResetToken(resolvedToken) == null) {
-            model.addAttribute("error", "This reset link is invalid or has expired.");
-            return "reset-password";
-        }
-        model.addAttribute("token", resolvedToken);
+        // Directly render reset-password with token in model — no redirect, no session
+        model.addAttribute("token", token);
         return "reset-password";
     }
 
+    // Direct GET (e.g. manual navigation)
+    @GetMapping("/reset-password")
+    public String resetPasswordPage(@RequestParam(required = false) String token, Model model) {
+        if (token == null || token.isBlank() || userService.findByResetToken(token) == null) {
+            model.addAttribute("error", "No reset request found. Please enter your email again.");
+            return "reset-password";
+        }
+        model.addAttribute("token", token);
+        return "reset-password";
+    }
+
+    // Step 2: submit new password
     @PostMapping("/reset-password")
     public String resetPasswordSubmit(@RequestParam String token,
                                       @RequestParam String password,
-                                      HttpSession session,
                                       Model model) {
         boolean success = userService.resetPassword(token, password);
         if (!success) {
             model.addAttribute("error", "This reset link is invalid or has expired.");
-            model.addAttribute("token", null); // clears form, shows try-again link
             return "reset-password";
         }
-        session.removeAttribute("resetToken");
-        return "redirect:/reset-success";
-    }
-
-    @GetMapping("/reset-success")
-    public String resetSuccess(Model model) {
         model.addAttribute("msg", "Password reset successfully! You can now sign in with your new password.");
         return "success";
     }
