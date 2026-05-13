@@ -5,9 +5,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
-RUN useradd -m -u 1000 user
-USER user
 WORKDIR /app
-COPY --chown=user --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 7860
 ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=7860"]
