@@ -17,7 +17,7 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:HireFlow@SuperSecret#JWT$Key2026!!}")
     private String secret;
 
     private SecretKey getKey() {
