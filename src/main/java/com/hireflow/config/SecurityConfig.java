@@ -35,7 +35,7 @@ public class SecurityConfig {
                     "/", "/login", "/signup", "/register",
                     "/verify-recruiter-code", "/logout",
                     "/forgot-password", "/reset-password",
-                    "/css/**", "/js/**",
+                    "/css/**", "/js/**", "/fonts/**", "/favicon.ico",
                     "/swagger-ui/**", "/v3/api-docs/**",
                     "/api/login", "/api/refresh"
                 ).permitAll()

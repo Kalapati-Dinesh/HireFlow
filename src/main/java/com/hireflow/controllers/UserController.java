@@ -30,6 +30,9 @@ public class UserController {
     @Value("${recruiter.access.code}")
     private String recruiterAccessCode;
 
+    @Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
+
     // ── SIGNUP ──
 
     @GetMapping("/signup")
@@ -138,7 +141,7 @@ public class UserController {
     public String forgotPasswordSubmit(@RequestParam String email, Model model) {
         String token = userService.generateResetToken(email);
         if (token != null) {
-            String resetLink = "https://web-production-b16a4.up.railway.app/reset-password?token=" + token;
+            String resetLink = baseUrl + "/reset-password?token=" + token;
             emailService.sendMail(email, "HireFlow — Reset Your Password",
                 "Hi,\n\nClick the link below to reset your password. This link expires in 30 minutes.\n\n" + resetLink + "\n\nIf you didn't request this, ignore this email.");
         }
