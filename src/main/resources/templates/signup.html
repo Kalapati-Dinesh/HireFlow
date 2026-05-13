@@ -279,29 +279,17 @@
             showModalErr('Please enter the access code.');
             return;
         }
-
-        const btn = document.querySelector('.btn-verify');
-        btn.textContent = 'Verifying...';
-        btn.disabled = true;
-
-        fetch('/verify-recruiter-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'accessCode=' + encodeURIComponent(code)
-        }).then(res => {
-            if (res.redirected && res.url.includes('verified=true')) {
-                // Success — reload with verified flag
-                window.location.href = '/signup?role=RECRUITER&verified=true';
-            } else {
-                showModalErr('Invalid access code. Please contact your HR administrator.');
-                btn.textContent = 'Verify & Continue';
-                btn.disabled = false;
-            }
-        }).catch(() => {
-            showModalErr('Something went wrong. Please try again.');
-            btn.textContent = 'Verify & Continue';
-            btn.disabled = false;
-        });
+        // Submit as a real form so session is properly set
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/verify-recruiter-code';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'accessCode';
+        input.value = code;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
     }
 
     function showModalErr(msg) {
