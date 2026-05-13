@@ -43,7 +43,7 @@ public class EmailService {
                 .toBodilessEntity();
 
         } catch (Exception e) {
-            logger.error("Failed to send email to {}: {}", to, e.getMessage(), e);
+            logger.error("Failed to send email to {} | apiKey empty: {} | error: {}", to, apiKey.isBlank(), e.getMessage());
         }
     }
 }
