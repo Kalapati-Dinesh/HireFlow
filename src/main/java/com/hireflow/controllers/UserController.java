@@ -30,9 +30,6 @@ public class UserController {
     @Value("${recruiter.access.code}")
     private String recruiterAccessCode;
 
-    @Value("${app.base-url:http://localhost:8080}")
-    private String baseUrl;
-
     // ── SIGNUP ──
 
     @GetMapping("/signup")
@@ -138,36 +135,45 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
-    public String forgotPasswordSubmit(@RequestParam String email, Model model) {
+    public String forgotPasswordSubmit(@RequestParam String email,
+                                       HttpSession session,
+                                       Model model) {
         String token = userService.generateResetToken(email);
-        if (token != null) {
-            String resetLink = baseUrl + "/reset-password?token=" + token;
-            emailService.sendMail(email, "HireFlow — Reset Your Password",
-                "Hi,\n\nClick the link below to reset your password. This link expires in 30 minutes.\n\n" + resetLink + "\n\nIf you didn't request this, ignore this email.");
+        if (token == null) {
+            model.addAttribute("error", "No account found with that email address.");
+            return "forgot-password";
         }
-        model.addAttribute("msg", "If an account exists with that email, a reset link has been sent.");
-        return "forgot-password";
+        // Store token in session — redirect directly to reset page, no email link needed
+        session.setAttribute("resetToken", token);
+        return "redirect:/reset-password";
     }
 
     @GetMapping("/reset-password")
-    public String resetPasswordPage(@RequestParam String token, Model model) {
-        if (userService.findByResetToken(token) == null) {
+    public String resetPasswordPage(HttpSession session,
+                                    @RequestParam(required = false) String token,
+                                    Model model) {
+        // Support both session-based (in-app) and email link (token param)
+        String resolvedToken = (token != null) ? token
+                : (String) session.getAttribute("resetToken");
+        if (resolvedToken == null || userService.findByResetToken(resolvedToken) == null) {
             model.addAttribute("error", "This reset link is invalid or has expired.");
             return "reset-password";
         }
-        model.addAttribute("token", token);
+        model.addAttribute("token", resolvedToken);
         return "reset-password";
     }
 
     @PostMapping("/reset-password")
     public String resetPasswordSubmit(@RequestParam String token,
                                       @RequestParam String password,
+                                      HttpSession session,
                                       Model model) {
         boolean success = userService.resetPassword(token, password);
         if (!success) {
             model.addAttribute("error", "This reset link is invalid or has expired.");
             return "reset-password";
         }
+        session.removeAttribute("resetToken");
         model.addAttribute("msg", "Password reset successfully! You can now sign in.");
         return "success";
     }
