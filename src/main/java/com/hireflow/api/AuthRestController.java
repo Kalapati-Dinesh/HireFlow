@@ -59,7 +59,7 @@ public class AuthRestController {
             return ResponseEntity.ok(new AuthResponse(newAccessToken, request.getRefreshToken()));
 
         } catch (JwtException e) {
-            logger.warn("Refresh token invalid: {}", e.getMessage());
+            logger.warn("Refresh token invalid: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token");
         }
     }
