@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireFlow — Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --navy:#1a2744; --accent:#2563eb; --border:#e2e8f0; --muted:#64748b; --bg:#f8fafc; }
+        html, body { height: 100%; font-family: 'Inter', sans-serif; overflow: hidden; }
+        body { display: grid; grid-template-columns: 1fr 1fr; }
+
+        /* LEFT */
+        .left {
+            background: var(--navy);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 48px 56px; position: relative; overflow: hidden;
+        }
+        .left::before {
+            content: ''; position: absolute;
+            width: 480px; height: 480px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 65%);
+            top: -100px; right: -100px; pointer-events: none;
+        }
+        .left::after {
+            content: ''; position: absolute;
+            width: 320px; height: 320px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 65%);
+            bottom: -60px; left: -60px; pointer-events: none;
+        }
+        .logo { font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; position: relative; z-index: 1; text-decoration: none; }
+        .logo span { color: #60a5fa; }
+
+        .left-body { position: relative; z-index: 1; }
+        .left-body h1 { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: #fff; line-height: 1.2; margin-bottom: 16px; }
+        .left-body p { color: #94a3b8; font-size: 0.88rem; line-height: 1.75; max-width: 320px; margin-bottom: 40px; }
+
+        .feat-list { display: flex; flex-direction: column; gap: 14px; }
+        .feat { display: flex; align-items: center; gap: 12px; font-size: 0.84rem; color: #94a3b8; }
+        .feat-dot { width: 20px; height: 20px; border-radius: 50%; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .feat-dot i { font-size: 0.65rem; color: #60a5fa; }
+
+        .left-foot { color: #334155; font-size: 0.76rem; position: relative; z-index: 1; }
+
+        /* RIGHT */
+        .right { background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 48px 56px; }
+        .box { width: 100%; max-width: 380px; }
+
+        .box-header { margin-bottom: 32px; }
+        .box-header .tag { font-size: 0.72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+        .box-header h2 { font-size: 1.6rem; font-weight: 700; color: var(--navy); letter-spacing: -0.4px; margin-bottom: 6px; }
+        .box-header p { font-size: 0.86rem; color: var(--muted); }
+
+        .err { background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 14px; font-size: 0.82rem; color: #dc2626; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+
+        .field { margin-bottom: 18px; }
+        .field label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 7px; }
+        .iw { position: relative; }
+        .iw .li { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.88rem; pointer-events: none; }
+        .iw input {
+            width: 100%; padding: 10px 38px 10px 36px;
+            border: 1.5px solid var(--border); border-radius: 6px;
+            font-size: 0.875rem; font-family: 'Inter', sans-serif;
+            background: #fff; color: #1e293b; outline: none;
+            transition: border-color 0.18s, box-shadow 0.18s;
+        }
+        .iw input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+        .iw input::placeholder { color: #cbd5e1; }
+        .eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; font-size: 0.88rem; transition: color 0.18s; }
+        .eye:hover { color: var(--accent); }
+
+        .btn-submit {
+            width: 100%; padding: 11px; background: var(--navy); color: #fff; border: 2px solid var(--navy);
+            border-radius: 6px; font-size: 0.875rem; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.18s, border-color 0.18s, transform 0.1s; margin-top: 4px;
+        }
+        .btn-submit:hover { background: #243358; border-color: #243358; }
+        .btn-submit:active { transform: scale(0.99); }
+
+        .sep { display: flex; align-items: center; gap: 10px; margin: 22px 0; color: #cbd5e1; font-size: 0.76rem; }
+        .sep::before, .sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .foot-link { text-align: center; font-size: 0.82rem; color: var(--muted); }
+        .foot-link a { color: var(--accent); font-weight: 600; text-decoration: none; }
+        .foot-link a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            body { grid-template-columns: 1fr; overflow: auto; }
+            .left { display: none; }
+            .right { padding: 40px 24px; }
+        }
+    </style>
+</head>
+<body>
+<div class="left">
+    <a href="/" class="logo">Hire<span>Flow</span></a>
+    <div class="left-body">
+        <h1>Recruitment,<br>Simplified.</h1>
+        <p>A focused platform for recruiters to manage pipelines and students to track every application.</p>
+        <div class="feat-list">
+            <div class="feat"><div class="feat-dot"><i class="bi bi-check2"></i></div>End-to-end candidate management</div>
+            <div class="feat"><div class="feat-dot"><i class="bi bi-check2"></i></div>Automated status email notifications</div>
+            <div class="feat"><div class="feat-dot"><i class="bi bi-check2"></i></div>Role-based access — recruiter &amp; student</div>
+            <div class="feat"><div class="feat-dot"><i class="bi bi-check2"></i></div>Live dashboard with real-time stats</div>
+        </div>
+    </div>
+    <div class="left-foot">© 2026 HireFlow</div>
+</div>
+
+<div class="right">
+    <div class="box">
+        <div class="box-header">
+            <div class="tag">Sign In</div>
+            <h2>Welcome back</h2>
+            <p>Enter your credentials to access your account</p>
+        </div>
+
+        <div th:if="${msg}" class="err">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span th:text="${msg}"></span>
+        </div>
+
+        <form action="/login" method="post">
+            <div class="field">
+                <label>Email Address</label>
+                <div class="iw">
+                    <i class="bi bi-envelope li"></i>
+                    <input type="email" name="email" placeholder="you@example.com" required autofocus>
+                </div>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <div class="iw">
+                    <i class="bi bi-lock li"></i>
+                    <input type="password" name="password" id="pwd" placeholder="Your password" required>
+                    <i class="bi bi-eye eye" id="ei" onclick="tp()"></i>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Sign In <i class="bi bi-arrow-right"></i></button>
+        </form>
+
+        <div class="sep">or</div>
+        <div class="foot-link">Don't have an account? <a href="/signup">Create one free</a></div>
+    </div>
+</div>
+<script>
+    function tp() {
+        const p = document.getElementById('pwd'), i = document.getElementById('ei');
+        p.type = p.type === 'password' ? 'text' : 'password';
+        i.className = p.type === 'password' ? 'bi bi-eye eye' : 'bi bi-eye-slash eye';
+    }
+</script>
+</body>
+</html>
