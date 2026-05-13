@@ -171,6 +171,7 @@ public class UserController {
         boolean success = userService.resetPassword(token, password);
         if (!success) {
             model.addAttribute("error", "This reset link is invalid or has expired.");
+            model.addAttribute("token", null); // clears form, shows try-again link
             return "reset-password";
         }
         session.removeAttribute("resetToken");
