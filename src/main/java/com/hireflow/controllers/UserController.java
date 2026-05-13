@@ -85,6 +85,15 @@ public class UserController {
             return "signup";
         }
 
+        emailService.sendMail(
+            email,
+            "Welcome to HireFlow!",
+            "Dear " + name + ",\n\n"
+            + "Welcome to HireFlow! Your account has been created successfully.\n\n"
+            + "You can now log in and " + ("RECRUITER".equals(role) ? "start posting jobs and managing applications." : "start exploring job opportunities.") + "\n\n"
+            + "Best Regards,\nHireFlow Recruitment Team"
+        );
+
         model.addAttribute("msg", "Account created successfully! You can now sign in.");
         return "success";
     }
@@ -132,7 +141,10 @@ public class UserController {
         return "forgot-password";
     }
 
-    // Step 1: enter email → directly render reset-password (NO redirect)
+    @Value("${app.base-url}")
+    private String baseUrl;
+
+    // Step 1: enter email → send reset link via email
     @PostMapping("/forgot-password")
     public String forgotPasswordSubmit(@RequestParam String email, Model model) {
         String token = userService.generateResetToken(email);
@@ -140,9 +152,17 @@ public class UserController {
             model.addAttribute("error", "No account found with that email address.");
             return "forgot-password";
         }
-        // Directly render reset-password with token in model — no redirect, no session
-        model.addAttribute("token", token);
-        return "reset-password";
+        String resetLink = baseUrl + "/reset-password?token=" + token;
+        emailService.sendMail(
+            email,
+            "Reset Your HireFlow Password",
+            "Hello,\n\nClick the link below to reset your password (valid for 30 minutes):\n\n"
+            + resetLink + "\n\n"
+            + "If you did not request this, please ignore this email.\n\n"
+            + "Best Regards,\nHireFlow Recruitment Team"
+        );
+        model.addAttribute("msg", "Password reset link has been sent to your email.");
+        return "success";
     }
 
     // Direct GET (e.g. manual navigation)
