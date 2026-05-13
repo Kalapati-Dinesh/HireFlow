@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.hireflow.entities.JobPosting;
+import com.hireflow.repositories.ApplicationRepository;
 import com.hireflow.repositories.JobPostingRepository;
 
 @Service
@@ -14,6 +15,9 @@ public class JobPostingService {
 
     @Autowired
     JobPostingRepository jobRepo;
+
+    @Autowired
+    ApplicationRepository applicationRepo;
 
     public void saveJob(JobPosting job) {
         job.setPostedDate(LocalDate.now());
@@ -54,6 +58,8 @@ public class JobPostingService {
     }
 
     public void deleteJob(int id) {
+        JobPosting job = getJobById(id);
+        applicationRepo.deleteAll(applicationRepo.findByJob(job));
         jobRepo.deleteById(id);
     }
 
