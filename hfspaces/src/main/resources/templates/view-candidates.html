@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireFlow — Candidates</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --navy:#1a2744; --accent:#2563eb; --border:#e2e8f0; --muted:#64748b; --bg:#f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
+
+        .topbar { background: var(--navy); padding: 0 48px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; text-decoration: none; }
+        .logo span { color: #60a5fa; }
+        .nav-r { display: flex; align-items: center; gap: 12px; }
+        .btn-add { display: flex; align-items: center; gap: 6px; background: var(--accent); color: #fff; border: 2px solid var(--accent); border-radius: 6px; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; font-family: 'Inter', sans-serif; text-decoration: none; transition: background 0.18s, border-color 0.18s; }
+        .btn-add:hover { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+        .btn-out { font-size: 0.8rem; font-weight: 600; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color 0.18s; }
+        .btn-out:hover { color: #f87171; }
+
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px; flex: 1; width: 100%; }
+        .back { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--muted); text-decoration: none; margin-bottom: 20px; transition: color 0.18s; }
+        .back:hover { color: var(--accent); }
+
+        .pg-head { margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .pg-head .tag { font-size: 0.72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+        .pg-head h1 { font-size: 1.5rem; font-weight: 700; color: var(--navy); letter-spacing: -0.4px; margin-bottom: 4px; }
+        .pg-head p { font-size: 0.86rem; color: var(--muted); }
+
+        .toolbar { background: #fff; border-radius: 8px; border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .tf { display: flex; align-items: stretch; flex: 1; min-width: 200px; }
+        .tf .ti { background: var(--bg); border: 1.5px solid var(--border); border-right: none; border-radius: 6px 0 0 6px; padding: 9px 11px; color: #94a3b8; font-size: 0.88rem; display: flex; align-items: center; }
+        .tf input, .tf select { flex: 1; border: 1.5px solid var(--border); border-left: none; border-right: none; padding: 9px 12px; font-size: 0.86rem; font-family: 'Inter', sans-serif; background: var(--bg); color: #1e293b; outline: none; transition: border-color 0.18s; }
+        .tf input:focus, .tf select:focus { border-color: var(--accent); background: #fff; }
+        .tf input::placeholder { color: #cbd5e1; }
+        .tf button { background: var(--navy); color: #fff; border: 1.5px solid var(--navy); border-radius: 0 6px 6px 0; padding: 9px 16px; font-size: 0.82rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.18s; white-space: nowrap; }
+        .tf button:hover { background: #243358; border-color: #243358; }
+        .btn-reset { background: #fff; color: var(--muted); border: 1.5px solid var(--border); border-radius: 6px; padding: 9px 14px; font-size: 0.82rem; font-weight: 600; font-family: 'Inter', sans-serif; text-decoration: none; white-space: nowrap; transition: background 0.18s; }
+        .btn-reset:hover { background: var(--bg); color: #374151; }
+
+        .card { background: #fff; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: var(--bg); padding: 12px 16px; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); text-align: left; }
+        tbody td { padding: 13px 16px; font-size: 0.86rem; color: #374151; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #fafafa; }
+
+        .cname { font-weight: 600; color: var(--navy); font-size: 0.86rem; }
+        .cemail { font-size: 0.78rem; color: #94a3b8; margin-top: 1px; }
+        .co { display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: var(--accent); border-radius: 4px; padding: 3px 9px; font-size: 0.76rem; font-weight: 600; }
+        .bs { padding: 4px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
+        .ba { background: #eff6ff; color: #1d4ed8; }
+        .bse { background: #f0fdf4; color: #15803d; }
+        .br { background: #fef2f2; color: #dc2626; }
+        .bp { background: #fefce8; color: #a16207; }
+
+        .btn-sel { background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0; border-radius: 5px; padding: 5px 12px; font-size: 0.76rem; font-weight: 700; text-decoration: none; transition: all 0.16s; }
+        .btn-sel:hover { background: #16a34a; color: #fff; border-color: #16a34a; }
+        .btn-rej { background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca; border-radius: 5px; padding: 5px 12px; font-size: 0.76rem; font-weight: 700; text-decoration: none; transition: all 0.16s; }
+        .btn-rej:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+        .act { display: flex; gap: 6px; }
+
+        .pag { display: flex; justify-content: center; gap: 4px; padding: 20px; }
+        .pag a { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1.5px solid var(--border); font-size: 0.82rem; font-weight: 600; color: #374151; text-decoration: none; transition: all 0.16s; }
+        .pag a:hover { border-color: var(--accent); color: var(--accent); }
+        .pag a.cur { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+        .empty { text-align: center; padding: 64px 20px; }
+        .empty i { font-size: 2.5rem; color: #cbd5e1; display: block; margin-bottom: 14px; }
+        .empty h5 { font-size: 0.95rem; font-weight: 700; color: #374151; margin-bottom: 6px; }
+        .empty p { font-size: 0.84rem; color: #94a3b8; }
+
+        footer { background: var(--navy); color: #334155; text-align: center; padding: 16px; font-size: 0.75rem; margin-top: auto; }
+        @media (max-width: 768px) { .topbar { padding: 0 20px; } .toolbar { flex-direction: column; } }
+    </style>
+</head>
+<body>
+<nav class="topbar">
+    <a href="/" class="logo">Hire<span>Flow</span></a>
+    <div class="nav-r">
+        <a href="/addCandidate" class="btn-add"><i class="bi bi-person-plus-fill"></i> Add Candidate</a>
+        <a href="/logout" class="btn-out"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
+</nav>
+<div class="wrap">
+    <a href="/login" class="back"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    <div class="pg-head">
+        <div class="tag">Recruiter</div>
+        <h1>All Candidates</h1>
+        <p>Search, filter and manage every candidate in the pipeline.</p>
+    </div>
+
+    <div class="toolbar">
+        <form action="/searchCandidate" method="get" style="display:contents;">
+            <div class="tf">
+                <span class="ti"><i class="bi bi-search"></i></span>
+                <input type="text" name="email" placeholder="Search by email address...">
+                <button type="submit">Search</button>
+            </div>
+        </form>
+        <form action="/filterStatus" method="get" style="display:contents;">
+            <div class="tf">
+                <span class="ti"><i class="bi bi-funnel"></i></span>
+                <select name="status">
+                    <option value="APPLIED">Applied</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="SELECTED">Selected</option>
+                    <option value="REJECTED">Rejected</option>
+                </select>
+                <button type="submit">Filter</button>
+            </div>
+        </form>
+        <a href="/viewCandidates" class="btn-reset"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+    </div>
+
+    <div class="card">
+        <div th:if="${#lists.isEmpty(candidates)}" class="empty">
+            <i class="bi bi-people"></i>
+            <h5>No candidates found</h5>
+            <p>Try adjusting your search or filter, or add a new candidate.</p>
+        </div>
+        <div th:if="${!#lists.isEmpty(candidates)}">
+            <table>
+                <thead><tr><th>#</th><th>Candidate</th><th>Company</th><th>Position</th><th>Status</th><th>Applied</th><th>Actions</th></tr></thead>
+                <tbody>
+                    <tr th:each="c : ${candidates}">
+                        <td style="color:#94a3b8;font-size:0.78rem;" th:text="${c.id}"></td>
+                        <td><div class="cname" th:text="${c.studentName}"></div><div class="cemail" th:text="${c.studentEmail}"></div></td>
+                        <td><span class="co"><i class="bi bi-building"></i><span th:text="${c.companyName}"></span></span></td>
+                        <td style="font-weight:500;" th:text="${c.position}"></td>
+                        <td>
+                            <span th:if="${c.status=='APPLIED'}"     class="bs ba">Applied</span>
+                            <span th:if="${c.status=='SELECTED'}"    class="bs bse">&#10003; Selected</span>
+                            <span th:if="${c.status=='REJECTED'}"    class="bs br">&#10007; Rejected</span>
+                            <span th:if="${c.status=='IN_PROGRESS'}" class="bs bp">In Progress</span>
+                        </td>
+                        <td style="color:#64748b;font-size:0.82rem;" th:text="${c.appliedDate}"></td>
+                        <td><div class="act">
+                            <a th:href="@{/updateStatus(id=${c.id},status='SELECTED')}" class="btn-sel">Select</a>
+                            <a th:href="@{/updateStatus(id=${c.id},status='REJECTED')}" class="btn-rej">Reject</a>
+                        </div></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div th:if="${totalPages != null and totalPages > 1}" class="pag">
+                <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                   th:href="@{/viewCandidates(page=${i})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i == currentPage} ? 'cur'"></a>
+            </div>
+        </div>
+    </div>
+</div>
+<footer>© 2026 HireFlow</footer>
+</body>
+</html>

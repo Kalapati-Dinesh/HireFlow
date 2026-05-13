@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireFlow — Job Postings</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --navy:#1a2744; --navy2:#243358; --accent:#2563eb; --border:#e2e8f0; --muted:#64748b; --bg:#f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
+
+        .topbar { background: var(--navy); padding: 0 48px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.2rem; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: -0.3px; }
+        .logo span { color: #60a5fa; }
+        .nav-links { display: flex; align-items: center; gap: 4px; }
+        .nav-link { padding: 6px 14px; font-size: 0.82rem; font-weight: 600; color: #94a3b8; text-decoration: none; border-radius: 5px; transition: all 0.18s; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.08); color: #fff; }
+        .nav-r { display: flex; align-items: center; gap: 16px; }
+        .role-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 5px 14px 5px 8px; font-size: 0.78rem; font-weight: 600; color: #94a3b8; }
+        .av { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.72rem; font-weight: 700; }
+        .btn-out { font-size: 0.8rem; font-weight: 600; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color 0.18s; }
+        .btn-out:hover { color: #f87171; }
+
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px; flex: 1; width: 100%; }
+        .pg-head { margin-bottom: 28px; border-bottom: 1px solid var(--border); padding-bottom: 20px; display: flex; align-items: flex-end; justify-content: space-between; }
+        .pg-head-left .tag { font-size: 0.72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+        .pg-head-left h1 { font-size: 1.5rem; font-weight: 700; color: var(--navy); letter-spacing: -0.4px; }
+        .btn-new { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; background: var(--navy); color: #fff; border: 2px solid var(--navy); border-radius: 6px; font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: background 0.18s; }
+        .btn-new:hover { background: var(--navy2); color: #fff; }
+
+        .toast { padding: 12px 16px; border-radius: 6px; font-size: 0.84rem; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+        .toast-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+        .toast-info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+
+        .card { background: #fff; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: var(--bg); padding: 12px 16px; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); text-align: left; }
+        tbody td { padding: 14px 16px; font-size: 0.86rem; color: #374151; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #fafafa; }
+
+        .badge-active { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; padding: 4px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
+        .badge-closed { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 4px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
+
+        .act { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-sm { padding: 5px 12px; border-radius: 5px; font-size: 0.76rem; font-weight: 700; text-decoration: none; border: 1.5px solid; transition: all 0.16s; }
+        .btn-edit  { background: #eff6ff; color: var(--accent); border-color: #bfdbfe; }
+        .btn-edit:hover  { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .btn-apps  { background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe; }
+        .btn-apps:hover  { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+        .btn-close { background: #fefce8; color: #a16207; border-color: #fde68a; }
+        .btn-close:hover { background: #d97706; color: #fff; border-color: #d97706; }
+        .btn-del   { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+        .btn-del:hover   { background: #dc2626; color: #fff; border-color: #dc2626; }
+        .btn-sm[type=submit] { cursor: pointer; font-family: inherit; }
+
+        .empty { text-align: center; padding: 48px 20px; }
+        .empty i { font-size: 2.2rem; color: #cbd5e1; display: block; margin-bottom: 12px; }
+        .empty p { font-size: 0.88rem; color: var(--muted); }
+
+        footer { background: var(--navy); color: #334155; text-align: center; padding: 16px; font-size: 0.75rem; margin-top: auto; }
+        @media (max-width: 768px) { .topbar { padding: 0 20px; } .pg-head { flex-direction: column; align-items: flex-start; gap: 14px; } }
+    </style>
+</head>
+<body>
+
+<nav class="topbar">
+    <a href="/" class="logo">Hire<span>Flow</span></a>
+    <div class="nav-links">
+        <a href="/recruiter/dashboard" class="nav-link">Dashboard</a>
+        <a href="/recruiter/jobs" class="nav-link active">Job Postings</a>
+        <a href="/recruiter/applications" class="nav-link">Applications</a>
+    </div>
+    <div class="nav-r">
+        <div class="role-pill"><div class="av">R</div> Recruiter</div>
+        <a href="/logout" class="btn-out"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
+</nav>
+
+<div class="wrap">
+    <div class="pg-head">
+        <div class="pg-head-left">
+            <div class="tag">Recruiter</div>
+            <h1>Job Postings</h1>
+        </div>
+        <a href="/recruiter/jobs/new" class="btn-new"><i class="bi bi-plus-lg"></i> Post New Job</a>
+    </div>
+
+    <div th:if="${param.saved}"   class="toast toast-success"><i class="bi bi-check-circle-fill"></i> Job posted successfully.</div>
+    <div th:if="${param.updated}" class="toast toast-success"><i class="bi bi-check-circle-fill"></i> Job updated successfully.</div>
+    <div th:if="${param.closed}"  class="toast toast-info"><i class="bi bi-info-circle-fill"></i> Job closed. It will no longer accept applications.</div>
+    <div th:if="${param.deleted}" class="toast toast-success"><i class="bi bi-check-circle-fill"></i> Job deleted.</div>
+
+    <div class="card">
+        <div th:if="${jobs.isEmpty()}" class="empty">
+            <i class="bi bi-briefcase"></i>
+            <p>No job postings yet. <a href="/recruiter/jobs/new" style="color:var(--accent);font-weight:600;">Post your first job</a>.</p>
+        </div>
+        <div th:if="${!jobs.isEmpty()}">
+            <table>
+                <thead><tr><th>#</th><th>Title</th><th>Department</th><th>Location</th><th>Deadline</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    <tr th:each="job : ${jobs}">
+                        <td style="color:#94a3b8;font-size:0.78rem;" th:text="${job.id}"></td>
+                        <td style="font-weight:700;color:var(--navy);" th:text="${job.title}"></td>
+                        <td style="color:var(--muted);" th:text="${job.department}"></td>
+                        <td style="color:var(--muted);" th:text="${job.location}"></td>
+                        <td style="color:var(--muted);font-size:0.82rem;" th:text="${job.deadline}"></td>
+                        <td>
+                            <span th:if="${job.active}"  class="badge-active">Active</span>
+                            <span th:if="${!job.active}" class="badge-closed">Closed</span>
+                        </td>
+                        <td>
+                            <div class="act">
+                                <a th:href="@{/recruiter/jobs/{id}/edit(id=${job.id})}"         class="btn-sm btn-edit">Edit</a>
+                                <a th:href="@{/recruiter/jobs/{id}/applications(id=${job.id})}" class="btn-sm btn-apps">Applications</a>
+                                <form th:if="${job.active}" th:action="@{/recruiter/jobs/{id}/close(id=${job.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-sm btn-close">Close</button>
+                                </form>
+                                <form th:action="@{/recruiter/jobs/{id}/delete(id=${job.id})}" method="post" style="display:inline;" onsubmit="return confirm('Delete this job posting?')">
+                                    <button type="submit" class="btn-sm btn-del">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer>© 2026 HireFlow</footer>
+</body>
+</html>

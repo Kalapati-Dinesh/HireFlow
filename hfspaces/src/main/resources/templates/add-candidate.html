@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireFlow — Add Candidate</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --navy:#1a2744; --accent:#2563eb; --border:#e2e8f0; --muted:#64748b; --bg:#f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
+
+        .topbar { background: var(--navy); padding: 0 48px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; text-decoration: none; }
+        .logo span { color: #60a5fa; }
+        .btn-out { font-size: 0.8rem; font-weight: 600; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color 0.18s; }
+        .btn-out:hover { color: #f87171; }
+
+        .wrap { max-width: 680px; margin: 0 auto; padding: 40px 24px; flex: 1; width: 100%; }
+        .back { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--muted); text-decoration: none; margin-bottom: 20px; transition: color 0.18s; }
+        .back:hover { color: var(--accent); }
+
+        .pg-head { margin-bottom: 28px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .pg-head .tag { font-size: 0.72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+        .pg-head h1 { font-size: 1.5rem; font-weight: 700; color: var(--navy); letter-spacing: -0.4px; margin-bottom: 4px; }
+        .pg-head p { font-size: 0.86rem; color: var(--muted); }
+
+        .card { background: #fff; border-radius: 8px; border: 1px solid var(--border); padding: 32px; }
+        .sec-lbl { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+        .sec-lbl:not(:first-child) { margin-top: 24px; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .field label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 7px; }
+        .iw { position: relative; }
+        .iw .li { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.88rem; pointer-events: none; }
+        .iw input { width: 100%; padding: 10px 14px 10px 34px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.875rem; font-family: 'Inter', sans-serif; background: var(--bg); color: #1e293b; outline: none; transition: border-color 0.18s, box-shadow 0.18s, background 0.18s; }
+        .iw input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); background: #fff; }
+        .iw input::placeholder { color: #cbd5e1; }
+
+        .form-actions { display: flex; gap: 12px; margin-top: 28px; }
+        .btn-save { padding: 10px 24px; background: var(--navy); color: #fff; border: 2px solid var(--navy); border-radius: 6px; font-size: 0.875rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: background 0.18s, transform 0.1s; }
+        .btn-save:hover { background: #243358; border-color: #243358; }
+        .btn-save:active { transform: scale(0.99); }
+        .btn-cancel { padding: 10px 20px; background: #fff; color: #374151; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: background 0.18s; }
+        .btn-cancel:hover { background: var(--bg); color: #374151; }
+
+        footer { background: var(--navy); color: #334155; text-align: center; padding: 16px; font-size: 0.75rem; margin-top: auto; }
+        @media (max-width: 600px) { .row2 { grid-template-columns: 1fr; } .topbar { padding: 0 20px; } }
+    </style>
+</head>
+<body>
+<nav class="topbar">
+    <a href="/" class="logo">Hire<span>Flow</span></a>
+    <a href="/logout" class="btn-out"><i class="bi bi-box-arrow-right"></i> Logout</a>
+</nav>
+<div class="wrap">
+    <a href="/login" class="back"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    <div class="pg-head">
+        <div class="tag">Recruiter</div>
+        <h1>Add Candidate</h1>
+        <p>Fill in the details to register a new candidate in the pipeline.</p>
+    </div>
+    <div class="card">
+        <form action="/saveCandidate" method="post">
+            <div class="sec-lbl">Candidate Information</div>
+            <div class="row2">
+                <div class="field"><label>Full Name</label><div class="iw"><i class="bi bi-person li"></i><input type="text" name="studentName" placeholder="John Doe" required></div></div>
+                <div class="field"><label>Email Address</label><div class="iw"><i class="bi bi-envelope li"></i><input type="email" name="studentEmail" placeholder="john@example.com" required></div></div>
+            </div>
+            <div class="sec-lbl">Job Details</div>
+            <div class="row2">
+                <div class="field"><label>Company Name</label><div class="iw"><i class="bi bi-building li"></i><input type="text" name="companyName" placeholder="Acme Corp" required></div></div>
+                <div class="field"><label>Position</label><div class="iw"><i class="bi bi-briefcase li"></i><input type="text" name="position" placeholder="Software Engineer" required></div></div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-save"><i class="bi bi-person-plus-fill"></i> Save Candidate</button>
+                <a href="/viewCandidates" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+<footer>© 2026 HireFlow</footer>
+</body>
+</html>
