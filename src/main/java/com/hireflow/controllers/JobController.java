@@ -1,9 +1,14 @@
 package com.hireflow.controllers;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +21,6 @@ import com.hireflow.entities.JobPosting;
 import com.hireflow.entities.User;
 import com.hireflow.services.ApplicationService;
 import com.hireflow.services.JobPostingService;
-import com.hireflow.services.S3Service;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -25,7 +29,9 @@ public class JobController {
 
     @Autowired JobPostingService jobService;
     @Autowired ApplicationService appService;
-    @Autowired S3Service s3Service;
+
+    @Value("${app.upload.dir:uploads/resumes}")
+    private String uploadDir;
 
     @GetMapping("/jobs")
     public String jobsPage(Model model, HttpSession session) {
@@ -94,11 +100,20 @@ public class JobController {
                 return "user/job-detail";
             }
 
-            String s3Key = "resumes/" + UUID.randomUUID() + "_" + user.getId() + ext;
+            String fileName = UUID.randomUUID() + "_" + user.getId() + ext;
             try {
-                s3Service.uploadFile(s3Key, resume.getInputStream(), resume.getSize(), resume.getContentType());
-                resumePath = s3Key;
-            } catch (IOException | RuntimeException e) {
+                Path dirPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+                Files.createDirectories(dirPath);
+                Path resolvedPath = dirPath.resolve(fileName).normalize();
+                if (!resolvedPath.startsWith(dirPath)) {
+                    model.addAttribute("error", "Invalid file path.");
+                    model.addAttribute("job", job);
+                    model.addAttribute("alreadyApplied", false);
+                    return "user/job-detail";
+                }
+                Files.copy(resume.getInputStream(), resolvedPath, StandardCopyOption.REPLACE_EXISTING);
+                resumePath = fileName;
+            } catch (IOException e) {
                 model.addAttribute("error", "Failed to upload resume. Please try again.");
                 model.addAttribute("job", job);
                 model.addAttribute("alreadyApplied", false);
