@@ -128,7 +128,8 @@ public class RecruiterController {
         return "recruiter/applications";
     }
 
-    @GetMapping("/applications/{id}/status")
+    // State-changing operation must use POST, not GET (CSRF fix)
+    @PostMapping("/applications/{id}/status")
     public String updateStatus(@PathVariable int id,
                                @RequestParam String status,
                                HttpSession session) {

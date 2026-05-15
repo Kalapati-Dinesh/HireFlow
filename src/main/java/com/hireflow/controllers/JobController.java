@@ -1,14 +1,9 @@
 package com.hireflow.controllers;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +16,7 @@ import com.hireflow.entities.JobPosting;
 import com.hireflow.entities.User;
 import com.hireflow.services.ApplicationService;
 import com.hireflow.services.JobPostingService;
+import com.hireflow.services.S3Service;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -29,9 +25,7 @@ public class JobController {
 
     @Autowired JobPostingService jobService;
     @Autowired ApplicationService appService;
-
-    @Value("${app.upload.dir:uploads/resumes}")
-    private String uploadDir;
+    @Autowired S3Service s3Service;
 
     @GetMapping("/jobs")
     public String jobsPage(Model model, HttpSession session) {
@@ -39,7 +33,6 @@ public class JobController {
         if (user == null) return "redirect:/login";
         if ("RECRUITER".equals(user.getRole())) return "redirect:/recruiter/dashboard";
 
-        // Check if user has any status updates (not APPLIED)
         boolean hasUpdates = appService.getApplicationsByUser(user).stream()
                 .anyMatch(a -> !"APPLIED".equals(a.getStatus()));
 
@@ -61,7 +54,6 @@ public class JobController {
                 .anyMatch(a -> Integer.valueOf(a.getUser().getId()).equals(user.getId())
                             && a.getJob().getId().equals(job.getId()));
 
-        // Check if user has any status updates
         boolean hasUpdates = appService.getApplicationsByUser(user).stream()
                 .anyMatch(a -> !"APPLIED".equals(a.getStatus()));
 
@@ -88,20 +80,25 @@ public class JobController {
             return "user/job-detail";
         }
 
-        // Save resume file
         String resumePath = null;
         if (resume != null && !resume.isEmpty()) {
             String originalName = resume.getOriginalFilename();
             String ext = (originalName != null && originalName.contains("."))
-                    ? originalName.substring(originalName.lastIndexOf("."))
+                    ? originalName.substring(originalName.lastIndexOf(".")).toLowerCase()
                     : ".pdf";
-            String fileName = UUID.randomUUID() + "_" + user.getId() + ext;
+
+            if (!ext.matches("\\.(pdf|doc|docx)")) {
+                model.addAttribute("error", "Only PDF, DOC, and DOCX files are allowed.");
+                model.addAttribute("job", job);
+                model.addAttribute("alreadyApplied", false);
+                return "user/job-detail";
+            }
+
+            String s3Key = "resumes/" + UUID.randomUUID() + "_" + user.getId() + ext;
             try {
-                Path dirPath = Paths.get(uploadDir);
-                Files.createDirectories(dirPath);
-                Files.copy(resume.getInputStream(), dirPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
-                resumePath = fileName;
-            } catch (IOException e) {
+                s3Service.uploadFile(s3Key, resume.getInputStream(), resume.getSize(), resume.getContentType());
+                resumePath = s3Key;
+            } catch (IOException | RuntimeException e) {
                 model.addAttribute("error", "Failed to upload resume. Please try again.");
                 model.addAttribute("job", job);
                 model.addAttribute("alreadyApplied", false);
