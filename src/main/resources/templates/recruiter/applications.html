@@ -193,7 +193,7 @@
                             </span>
                         </td>
                         <td>
-                            <form th:action="@{/recruiter/applications/{id}/status(id=${app.id})}" method="get" class="status-form">
+                            <form th:action="@{/recruiter/applications/{id}/status(id=${app.id})}" method="post" class="status-form">
                                 <select name="status" class="status-select">
                                     <option value="APPLIED"      th:selected="${app.status == 'APPLIED'}">Applied</option>
                                     <option value="UNDER_REVIEW" th:selected="${app.status == 'UNDER_REVIEW'}">Under Review</option>

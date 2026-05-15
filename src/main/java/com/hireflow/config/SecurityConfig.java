@@ -8,8 +8,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.hireflow.jwt.JwtFilter;
 
@@ -28,12 +26,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            // CSRF: enabled for MVC/Thymeleaf routes; disabled only for stateless JWT API routes
-            .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers(new AntPathRequestMatcher("/api/**"))
-            )
-
+            .csrf(csrf -> csrf.disable())
+            .logout(logout -> logout.disable())
             .authorizeHttpRequests(auth -> auth
                 // Public routes
                 .requestMatchers(
