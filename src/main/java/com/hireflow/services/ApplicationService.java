@@ -1,6 +1,7 @@
 package com.hireflow.services;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,7 @@ public class ApplicationService {
     public void updateStatus(int id, String status) {
         Application app = getApplicationById(id);
         app.setStatus(status);
+        app.setLastUpdated(new Date()); // track when status changed for red dot logic
         appRepo.save(app);
 
         String subject = "";

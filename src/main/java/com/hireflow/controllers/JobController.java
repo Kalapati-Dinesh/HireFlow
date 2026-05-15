@@ -39,8 +39,11 @@ public class JobController {
         if (user == null) return "redirect:/login";
         if ("RECRUITER".equals(user.getRole())) return "redirect:/recruiter/dashboard";
 
+        Long seenAt = (Long) session.getAttribute("updatesSeenAt");
         boolean hasUpdates = appService.getApplicationsByUser(user).stream()
-                .anyMatch(a -> !"APPLIED".equals(a.getStatus()));
+                .anyMatch(a -> !"APPLIED".equals(a.getStatus())
+                        && (seenAt == null || (a.getLastUpdated() != null
+                        && a.getLastUpdated().getTime() > seenAt)));
 
         model.addAttribute("activeJobs", jobService.getActiveJobs());
         model.addAttribute("expiredJobs", jobService.getRecentlyExpiredJobs());
@@ -60,8 +63,11 @@ public class JobController {
                 .anyMatch(a -> Integer.valueOf(a.getUser().getId()).equals(user.getId())
                             && a.getJob().getId().equals(job.getId()));
 
+        Long seenAt = (Long) session.getAttribute("updatesSeenAt");
         boolean hasUpdates = appService.getApplicationsByUser(user).stream()
-                .anyMatch(a -> !"APPLIED".equals(a.getStatus()));
+                .anyMatch(a -> !"APPLIED".equals(a.getStatus())
+                        && (seenAt == null || (a.getLastUpdated() != null
+                        && a.getLastUpdated().getTime() > seenAt)));
 
         model.addAttribute("job", job);
         model.addAttribute("alreadyApplied", alreadyApplied);
@@ -133,6 +139,9 @@ public class JobController {
         User user = (User) session.getAttribute("loggedInUser");
         if (user == null) return "redirect:/login";
         if ("RECRUITER".equals(user.getRole())) return "redirect:/recruiter/dashboard";
+
+        // Mark updates as seen — clears the red dot
+        session.setAttribute("updatesSeenAt", System.currentTimeMillis());
 
         model.addAttribute("applications", appService.getApplicationsByUser(user));
         model.addAttribute("user", user);

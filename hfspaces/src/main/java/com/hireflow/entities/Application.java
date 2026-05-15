@@ -1,6 +1,7 @@
 package com.hireflow.entities;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "application")
@@ -32,6 +35,9 @@ public class Application {
 
     private String resumePath;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdated;
+
     public Application() {}
 
     public Integer getId() { return id; }
@@ -51,4 +57,7 @@ public class Application {
 
     public String getResumePath() { return resumePath; }
     public void setResumePath(String resumePath) { this.resumePath = resumePath; }
+
+    public Date getLastUpdated() { return lastUpdated; }
+    public void setLastUpdated(Date lastUpdated) { this.lastUpdated = lastUpdated; }
 }
