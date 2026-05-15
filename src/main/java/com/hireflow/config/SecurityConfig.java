@@ -26,9 +26,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**")
-            )
+            .csrf(csrf -> csrf.disable())
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
             .logout(logout -> logout.disable())
             .authorizeHttpRequests(auth -> auth
                 // Public routes
@@ -49,7 +49,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
-
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             );
